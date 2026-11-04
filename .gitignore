@@ -1,55 +1,32 @@
-# Prerequisites
-*.d
+# === MARS IDE Configuration & Settings ===
+# MARS stores its settings locally, but sometimes saves config files in the project path
+Mars.properties
+Config.properties
 
-# Object files
+# === Common Assembly Toolchain Outputs ===
+# Ignore any accidental executables or binary objects if compiling via CLI tools
 *.o
-*.ko
-*.obj
-*.elf
-
-# Linker output
-*.ilk
-*.map
-*.exp
-
-# Precompiled Headers
-*.gch
-*.pch
-
-# Libraries
-*.lib
-*.a
-*.la
-*.lo
-
-# Shared objects (inc. Windows DLLs)
-*.dll
-*.so
-*.so.*
-*.dylib
-
-# Executables
-*.exe
 *.out
-*.app
-*.i*86
-*.x86_64
-*.hex
+*.obj
+*.exe
 
-# Debug files
-*.dSYM/
-*.su
-*.idb
-*.pdb
+# === OS & Editor Specifics ===
+# Windows thumbnail database / desktop configuration
+Thumbs.db
+ehthumbs.db
+Desktop.ini
 
-# Kernel Module Compile Results
-*.mod*
-*.cmd
-.tmp_versions/
-modules.order
-Module.symvers
-Mkfile.old
-dkms.conf
+# macOS specific files (very common if working on a Mac)
+.DS_Store
+.AppleDouble
+.LSOverride
 
-# debug information files
-*.dwo
+# Linux/Unix temp files
+*~
+
+# === Backup & Temporary Files ===
+# Editors like Notepad++, VS Code, or Vim may leave swap/backup files
+*.swp
+*.bak
+*.tmp
+*.log
