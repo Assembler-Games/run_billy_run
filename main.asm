@@ -17,8 +17,12 @@ main:
 	#initialize billy
 	jal initBilly
 	
+
 	# Draw Billy
 	jal drawBilly
+	
+	# Draw Ground
+	jal drawGround
 gameLoop:
 	
 	# Erase billy from the bitmap display by drawing black pixel at his position	
