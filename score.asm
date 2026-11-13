@@ -13,7 +13,7 @@ scoreMultiplier:   .word 1
 scoreFrameCounter: .word 0
 scoreDirty:        .word 1          # 1 = score changed, needs redraw
 
-scoreColor:        .word 0x00ff69b4 # pink digits
+scoreColor:        .word 0x00ffff00 # yellow text
 scoreBgColor:      .word 0x00000000 # black background
 finalScoreMsg: .asciiz "Final score: "
 highScoreMsg:  .asciiz "High score:  "
