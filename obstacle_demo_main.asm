@@ -16,6 +16,8 @@ main:
 	
 	#initialize billy
 	jal initBilly
+	
+	#initialize obstacle timer
 	jal initObstacle
 	
 
@@ -35,8 +37,10 @@ gameLoop:
 	# calculate and update billy's position if billy is jumping
 	jal updateBillyPhysics
 	
-	# draw billy
+	# update obstacle -> move original obstacle leftwards
 	jal updateObstacle
+	
+	#draw billy
 	jal drawBilly
 	
 	# delay between frames 
@@ -60,5 +64,5 @@ exit:
 .include "keyboard_input.asm"
 .include "render.asm"
 
-
+#use function in obstacle.asm
 .include "obstacle.asm"
