@@ -1,6 +1,8 @@
-#Margaret Oh
-#CS2640 Final Project- Billy Bronco Graphics
-#
+#Group 4 - Billy Bronco graphic development
+#File: score.asm
+#Contributors: Margaret Oh
+#Last Modified: 11/15/2026
+
 ################################################################
 ###			BITMAP SETTINGS				###
 ###								###
