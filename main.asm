@@ -1,4 +1,5 @@
 # Group 4 - Billy Run player code
+# Group Members: Gudimella Lahari, Lim Lee, Muy Kheng Ly, Jose Salas, Margaret Oh
 # File: main.asm
 # Contributors: 
 # Last Modified: 11/07/2026
