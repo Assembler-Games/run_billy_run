@@ -4,85 +4,109 @@
 #purpose:
 # Multiple obstacles for MARS Bitmap Display
 # One logical pixel per obstacle; maximum five simultaneous obstacles.
+#==================================
+
+
 .data
 obstacleX:      .word -1, -1, -1, -1, -1
+obstacleY:      .word 26          # y position of obstacles
 obstacleColor:  .word 0x00FF0000
 spawnTimer:     .word 0
 moveTimer:      .word 0
+collision:      .word 0
+
 
 .text
+# Function: initObstacle()
 # Initialize random generator and slots.
 initObstacle:
-    la $t4, obstacleX
-    li $t5, 5
-    li $t6, -1
+    	la $t4, obstacleX           # set $t4 to point to obstacles
+    	li $t5, 5                   # number of obstacles
+    	li $t6, -1                  # 
+
 initObstacleLoop:
     sw $t6, 0($t4)
-    addiu $t4, $t4, 4
-    addiu $t5, $t5, -1
-    bgtz $t5, initObstacleLoop
+    addiu $t4, $t4, 4           # move to the next obstacle
+    addiu $t5, $t5, -1          # decrement counter
+    bgtz $t5, initObstacleLoop  # loop until all slots set
     sw $zero, moveTimer
 
-    li $v0, 30                 # system time, low 32 bits in $a0
+    li $v0, 30                  # set system time, low 32 bits in $a0
     syscall
-    move $a1, $a0             # seed
-    li $a0, 1                 # random stream ID
+
+    move $a1, $a0               # seed
+    li $a0, 1                   # random stream ID
     li $v0, 40
     syscall
-    j randomSpawnTime         # tail call, keeps caller's $ra
+
+    j randomSpawnTime           # tail call, keeps caller's $ra
 
 # Random wait of 20..60 frames (approximately 1..3 seconds).
 randomSpawnTime:
-    li $v0, 42
-    li $a0, 1                 # same random stream
-    li $a1, 41                # returns 0..40 in $a0
+    li $v0, 42                  # random number
+    li $a0, 1                   # same random stream
+    li $a1, 41                  # returns 0..40 in $a0
     syscall
-    addiu $t3, $a0, 20
-    sw $t3, spawnTimer
+
+    addiu $t3, $a0, 20          # add 20 to random number
+    sw $t3, spawnTimer          # store new spawn time
     jr $ra
 
+# Function: updateObstacle()
 # Call exactly once per 50ms game frame.
 updateObstacle:
-    addiu $sp, $sp, -4
-    sw $ra, 0($sp)
+    addiu $sp, $sp, -4          # add space in stack for $ra
+    sw $ra, 0($sp)              # save return address
 
-    lw $t3, spawnTimer
-    addiu $t3, $t3, -1
+    lw $t3, spawnTimer          # load spawn timer
+    addiu $t3, $t3, -1          # decrement spawn timer
     sw $t3, spawnTimer
+
+    # check if spawn time is greater than 0 meaning no spawn yet
     bgtz $t3, obstacleMovementTimer
+
+    # if not, spawn obstacle
     jal spawnObstacle
-    jal randomSpawnTime       # independent of existing obstacles
+    jal randomSpawnTime         # independent of existing obstacles
 
 obstacleMovementTimer:
-    lw $t3, moveTimer
-    addiu $t3, $t3, 1
-    sw $t3, moveTimer
-    slti $t7, $t3, 2
-    bnez $t7, obstacleUpdateDone
-    sw $zero, moveTimer
+    lw $t3, moveTimer           # load move timer
+    addiu $t3, $t3, 1           # increment move timer
+    sw $t3, moveTimer           # save move timer
 
-    jal eraseObstacles
-    la $t4, obstacleX
-    li $t5, 5
+    slti $t7, $t3, 2            # if move timer < 2, set $t7 to 1 (true) else 0 (false)
+
+    bnez $t7, obstacleUpdateDone     # if ($t7 =! 0) -> jump to obstacleUpdateDone
+
+    sw $zero, moveTimer         # reset timer
+
+    jal eraseObstacles          #
+
+    la $t4, obstacleX           # point to obstacles
+    li $t5, 5                   # obstacle count
+
 obstacleMoveLoop:
-    lw $t6, 0($t4)
-    bltz $t6, obstacleMoveNext
-    addiu $t6, $t6, -1
-    sw $t6, 0($t4)            # -1 marks reusable slot
-obstacleMoveNext:
-    addiu $t4, $t4, 4
-    addiu $t5, $t5, -1
-    bgtz $t5, obstacleMoveLoop
-    jal drawObstacles
+    lw $t6, 0($t4)              # load obstacle position
+    bltz $t6, obstacleMoveNext  # skip if empty slot
+    addiu $t6, $t6, -1          # move obstacle left
 
-obstacleUpdateDone:
-    lw $ra, 0($sp)
+
+    sw $t6, 0($t4)              # save the new position
+
+obstacleMoveNext:
+    addiu $t4, $t4, 4           # point to next obstacle
+    addiu $t5, $t5, -1          # decrement count
+    bgtz $t5, obstacleMoveLoop  # loop if more obstacles to continue updating 
+    jal drawObstacles           # draw all obstacles
+
+obstacleUpdateDone: 
+    lw $ra, 0($sp)              # pop the return address save in stack
     addiu $sp, $sp, 4
     jr $ra
 
 # Fill first free slot; if full, skip this spawn attempt.
 spawnObstacle:
-    la $t4, obstacleX
+    la $t4, obstacleX           # point to obstacles
     li $t5, 5
 obstacleFindSlot:
     lw $t6, 0($t4)
@@ -137,3 +161,6 @@ obstacleDrawNext:
     lw $ra, 0($sp)
     addiu $sp, $sp, 4
     jr $ra
+
+
+
