@@ -86,13 +86,24 @@ obstacleMovementTimer:
     li $t5, 5                   # obstacle count
 
 obstacleMoveLoop:
-    lw $t6, 0($t4)              # load obstacle position
+    lw $t6, 0($t4)              # load obstacle x position
     bltz $t6, obstacleMoveNext  # skip if empty slot
+    
     addiu $t6, $t6, -1          # move obstacle left
-
-
     sw $t6, 0($t4)              # save the new position
-
+	
+	# check collision with Billy
+	lw $t7, billyX		# load billy's x coordinate
+	bne $t6, $t7, obstacleMoveNext
+	
+	lw $t7, billyY		# load billy's y coordinate
+	lw $t8, obstacleY	# load the obstacle's y coordinate
+	bne $t7, $t8, obstacleMoveNext
+	
+	# else if both coordinates match set collision to 1 (true) collision detected
+	li $t7, 1
+	sw $t7, collision
+	
 obstacleMoveNext:
     addiu $t4, $t4, 4           # point to next obstacle
     addiu $t5, $t5, -1          # decrement count

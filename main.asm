@@ -23,6 +23,10 @@ startNewGame:
 	#Reset the continue variable
     	li $t0, 1
     	sw $t0, continue
+    	
+    	#Reset the collision variable
+    	li $t0, 0
+    	sw $t0, collision
 
 	#initialize billy
 	jal initBilly
@@ -52,7 +56,6 @@ gameLoop:
 	
 	#check collision first
 	lw $t2, collision
-
 	bnez $t2, gameOver
 
 	# draw billy
