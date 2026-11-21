@@ -21,11 +21,14 @@ startNewGame:
 	jal initScore
 
 	#Reset the continue variable
-    li $t0, 1
-    sw $t0, continue
+    	li $t0, 1
+    	sw $t0, continue
 
 	#initialize billy
 	jal initBilly
+	
+	#initialize obstacle timer
+	jal initObstacle
 	
 	# Draw Billy
 	jal drawBilly
@@ -44,58 +47,60 @@ gameLoop:
 	#calculate and update billy's position if billy is jumping
 	jal updateBillyPhysics
 
-	#move the obstacle
-	jal moveObstacle
-
+	# update obstacle -> move original obstacle leftwards
+	jal updateObstacle
+	
 	#check collision first
-	jal checkCollision
+	lw $t2, collision
 
-	#when collision happened, game over
-	bne $v0, $zero, gameOver
+	bnez $t2, gameOver
 
 	# draw billy
 	jal drawBilly
-
+	
+	jal addScore
+	
 	#Check if the player wants to quit
-    li $t0, 0
-    lw $t1, continue
-    beq $t0, $t1, quitGame
 
-	# delay between frames 
-	li $v0, 32
+    	lw $t1, continue
+    	
+    	#when collision happened, game over
+	beq $t1, $zero, gameOver
+    	
+    	# delay between frames
+    	li $v0, 32
 	li $a0, 50
 	syscall
 	
 	j gameLoop
 
-exit:
-	li $v0, 10
-	syscall
 
 gameOver:
 	#Print the final score after collision
-    jal printFinalScore
+    	jal printFinalScore
 
 	#Ask if the player wants to restart
-    jal askRestart
+    	jal askRestart
 
 	#restart the game when $v0==1
 	li $t0, 1
-    beq $v0, $t0, startNewGame
+	
+    	beq $v0, $t0, startNewGame
 	#quit the game
 	j quitGame
 
 quitGame:
 	li $v0, 4
-    la $a0, exitMsg
-    syscall
+    	la $a0, exitMsg
+    	syscall
 
 	li $v0, 10
-    syscall
+    	syscall
 
 # This are placed at the bottom because
 .include "billy.asm"
 .include "keyboard_input.asm"
 .include "render.asm"
 .include "score.asm"
+.include "obstacle.asm"
 

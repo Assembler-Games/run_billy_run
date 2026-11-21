@@ -10,3 +10,9 @@
 	la $a0, %str
 	syscall
 .end_macro
+
+.macro printInt(%int)
+	li $v0, 1
+	move $a0, %int
+	syscall
+.end_macro
