@@ -1,18 +1,22 @@
+#===========================================
 # Group 4 - Billy Run player code
 # File: keyboard_input.asm
 # Contributors: 
 # Last Modified: 11/07/2026
-# Purpose: 
+# Purpose: Handle keyboard input from user via MMIO
+#===========================================
 
 .data
-    message: .asciiz "Press SPACE to jump!\n"
-    jumpMsg: .asciiz "Jump detected!\n"
+message: .asciiz "Press SPACE to jump!\n"
+jumpMsg: .asciiz "Jump detected!\n"
 
 .text
 
-    
-#Function: checkKeyboard()
-#Purpose: Checks the MMIO Control Receiver's ready bit and SPACE input.
+#===========================================
+# Function: checkKeyboard()
+# Purpose: Checks the MMIO Control Receiver's ready bit and SPACE input.
+# Input: none
+#===========================================
 checkKeyboard:
 	
 	li $t0, 0xFFFF0000 # Set $t0 to point to MMIO Receiver Control addres
@@ -37,9 +41,12 @@ checkForKey_q:
 keyboardDone:
 	# Return to caller
 	jr $ra
-	
-#Function: setBillyJumping()
-#Purpose: Sets the values of Billy's velocity, gracity, and set billyJumping to TRUE
+
+#===========================================
+# Function: setBillyJumping()
+# Purpose: Sets the values of Billy's velocity, gracity, and set billyJumping to TRUE
+# Input: none
+#===========================================
 setBillyJumping:
 	# Set register $t0 to point to variable address holding JUMP_VELOCITY
 	li $t0, JUMP_VELOCITY
@@ -48,6 +55,14 @@ setBillyJumping:
 	# Set isBillyJumping = 1
 	li $t0, 1
 	sw $t0, isBillyJumping
+	
+	# Play jump sound
+	li $v0, 31 	# play sound
+	li $a0, 65 	# pitch value
+	li $a1, 80 	# duration
+	li $a2, 81  # instrument
+	li $a3, 100 # volume
+	syscall
 	
 	j keyboardDone
 

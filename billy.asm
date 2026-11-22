@@ -1,11 +1,12 @@
+#===========================================
 # Group 4 - Billy Run player code
-# Contributors: Jose Salas
+# Author: Jose Salas
+# Contributors: 
 # Last Modified: 11/07/2026
 # Purpose: Establish billy's controls. Handles movement, gravity, and collisions with ground
+#===========================================
 
-.eqv SCREEN_WIDTH 64
-.eqv GROUND_Y 26
-.eqv JUMP_VELOCITY -5
+
 
 .data
 #Billy's initial position and velocity
@@ -17,8 +18,11 @@ isBillyJumping: .word 0 # values will be 0-1 (0 == not jumping, 1 == jumping)
 
 .text
 
-#Function: initBilly()
-
+#===========================================
+# Function: initBilly()
+# Purpose: set initial billy state
+# Input: none
+#===========================================
 initBilly:
 	# Store initial state in billy's position and gravity variables
 	li $t0, 16
@@ -36,11 +40,12 @@ initBilly:
 	
 	# Return to the caller after initializing
 	jr $ra
-	
 
-	
-#Function: updateBillyPhysics()
-#Purpose: Calculate and update billy's y-coord position for each frame
+#===========================================
+# Function: updateBillyPhysics()
+# Purpose: Calculate and update billy's y-coord position for each frame
+# Input: none
+#===========================================
 updateBillyPhysics:
 
 	#check if billy is jumping otherwise return

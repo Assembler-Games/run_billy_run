@@ -1,12 +1,15 @@
+#===========================================
 #Group 4 - Billy Run score code
 #File: score.asm
-#Contributors: Muy Kheng Ly
+#Author: Muy Kheng Ly
+#Contributors: 
 #Last Modified: 11/13/2026
 #Purpose: 	Calculate, store and display the score
 #		  	Billy passes obstacle without collision → +1 point
 #			Billy collides with obstacle → game over
+#===========================================
 
-.eqv SCORE_MAX 99999
+
 
 .data
 

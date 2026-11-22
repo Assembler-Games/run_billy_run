@@ -6,6 +6,7 @@
 # Purpose: 
 
 .include "macros.asm"
+.include "constants.asm"
 
 .data
 continue: .word 1 #variable use to check if continue
@@ -16,10 +17,15 @@ exitMsg: .asciiz "Exiting game...Have a great day!\n"
 .globl main
 
 main: 
+	jal initScreen
+	
 startNewGame:
 	#reset score for the new game
 	jal initScore
-
+	
+	lw $a2, screenGray
+	jal fillScreen
+	
 	#Reset the continue variable
     	li $t0, 1
     	sw $t0, continue
@@ -41,6 +47,7 @@ startNewGame:
 	jal drawGround
 
 gameLoop:
+	
 	
 	# Erase billy from the bitmap display by drawing black pixel at his position	
 	jal eraseBilly
@@ -64,7 +71,6 @@ gameLoop:
 	jal addScore
 	
 	#Check if the player wants to quit
-
     	lw $t1, continue
     	
     	#when collision happened, game over
@@ -74,7 +80,7 @@ gameLoop:
     	li $v0, 32
 	li $a0, 50
 	syscall
-	
+
 	j gameLoop
 
 
@@ -106,4 +112,5 @@ quitGame:
 .include "render.asm"
 .include "score.asm"
 .include "obstacle.asm"
+.include "sound.asm"
 
