@@ -53,6 +53,9 @@ gameLoop:
 	#when collision happened, game over
 	bne $v0, $zero, gameOver
 
+	#no collison, update the score
+	jal updateScore
+
 	# draw billy
 	jal drawBilly
 
