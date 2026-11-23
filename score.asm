@@ -7,11 +7,14 @@
 #			Billy collides with obstacle → game over
 
 .eqv SCORE_MAX 99999
+.eqv FRAMES_PER_POINT 10   #0.5s per point at 50 ms/frame
+.eqv JUMP_BONUS 5
 
 .data
-
 score:     .word 0
 highScore: .word 0
+frameCount: .word 0
+wasJumping: .word 0
 
 finalScoreMsg: .asciiz "\nGame Over!\nFinal score: "
 highScoreMsg:  .asciiz "\nHigh score: "
@@ -32,6 +35,8 @@ newline:      .asciiz "\n"
 #The high score is preserved.
 initScore:
     sw $zero, score
+    sw $zero, frameCount
+    sw $zero, wasJumping
     jr $ra
 
 #Adds points to the current score.
@@ -68,6 +73,39 @@ addScoreDone:
 obstaclePassed:
     li $a0, 1
     jal addScore
+    jr $ra
+
+.globl updateScore
+
+updateScore:
+    addiu $sp, $sp, -4
+    sw $ra, 0($sp)
+
+    # 1 point every FRAMES_PER_POINT frames survived
+    lw $t0, frameCount
+    addiu $t0, $t0, 1
+    li $t1, FRAMES_PER_POINT
+    blt $t0, $t1, storeFrames
+    sw $zero, frameCount
+    li $a0, 1
+    jal addScore
+    j checkLanding
+storeFrames:
+    sw $t0, frameCount
+
+checkLanding:
+    # Bonus when a jump finishes (was jumping, now on the ground)
+    lw $t0, isBillyJumping
+    lw $t1, wasJumping
+    sw $t0, wasJumping
+    beqz $t1, updateScoreDone    # wasn't jumping last frame
+    bnez $t0, updateScoreDone    # still in the air
+    li $a0, JUMP_BONUS
+    jal addScore
+
+updateScoreDone:
+    lw $ra, 0($sp)
+    addiu $sp, $sp, 4
     jr $ra
 
 #Prints the final score and high score.
