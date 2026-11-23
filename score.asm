@@ -48,7 +48,6 @@ addScore:
     bgez $t0, checkScoreMaximum
     li $t0, 0
 
-
 checkScoreMaximum:
     #Do not allow score above SCORE_MAX
     li $t1, SCORE_MAX
