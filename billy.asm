@@ -7,7 +7,6 @@
 #===========================================
 
 
-
 .data
 #Billy's initial position and velocity
 billyX: .word 0
@@ -28,7 +27,7 @@ initBilly:
 	li $t0, 16
 	sw $t0, billyX
 	
-	li $t1, GROUND_Y
+	li $t1, GROUND_Y	#in constants.asm (GROUND_Y = 58)
 	sw $t1, billyY
 	
 	li $t2, 1

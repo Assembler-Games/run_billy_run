@@ -9,8 +9,6 @@
 #			Billy collides with obstacle → game over
 #===========================================
 
-
-
 .data
 
 score:     .word 0

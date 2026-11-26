@@ -13,7 +13,18 @@
 green: 		.word 0x0000FF00
 black: 		.word 0x00000000
 white: 		.word 0x00FFFFFF
+
 screenGray: .word 0x00C0C0C0
+
+#screen
+#colors
+.eqv COLOR $t7
+.eqv SKY 0x90D5FF
+
+.eqv OUTLINE 0x6A462E
+.eqv FUR 0x736249		
+.eqv SHADOW 0x3C2C25	
+.eqv HAIR 0x000000		
 
 
 groundY: .word 59 # ground y position
@@ -95,7 +106,7 @@ initScreen:
 	li $a0, 524288
 	syscall
 	
-	sw $v0, heapBase
+	sw $v0, heapBase	#save the starting address in heapBase
 
 	lw $ra, 8($sp)
 	addi $sp, $sp, 8
@@ -171,7 +182,7 @@ drawPixel:
     	mul $s1, $s1, $s0
 
     	# Get heap base address
-    	lw $s2, heapBase
+    	lw $s2, heapBase	#s2 = base address
 
     	# Add the calculated offset to framebuffer base address
     	add $s2, $s2, $s1

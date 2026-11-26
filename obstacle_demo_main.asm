@@ -61,7 +61,7 @@ exit:
 	syscall
 
 
-# This are placed at the bottom because
+# This are placed at the bottom so they do not interfere with the initialization
 .include "billy.asm"
 .include "keyboard_input.asm"
 .include "render.asm"
