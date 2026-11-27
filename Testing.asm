@@ -126,7 +126,7 @@ bgLoop:
 	add $s0, $s0, $a1	
 	move $a3, $s0		#save the value of starting pos in a3
 
-##dont actually need this next commented out bit 
+##dont actually need this next commented out bitt
 #	la $t8, nextIndex
 #	li $t9, 1	#counter for which frame we're on
 #outer loop moves through the rows, inner loop moves through cols
