@@ -144,7 +144,7 @@ obstacleEraseLoop:
         bltz $t6, obstacleEraseNext
         move $a0, $t6
         lw $a1, obstacleY
-        lw $a2, screenGray
+        li $a2, SKY
         jal drawPixel
 obstacleEraseNext:
         addiu $t4, $t4, 4

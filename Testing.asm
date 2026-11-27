@@ -113,6 +113,7 @@ bgLoop:
 	bnez $t3, bgLoop	#repeat while number of pixels is not 0
 	
 	la $s0, display		#after the background is printed, the address is past the frame. Reset address to beginning	
+
 #################################
 #  DRAW THE BILLY BRONCO IMAGE  #
 #	    (4 fps)		 #

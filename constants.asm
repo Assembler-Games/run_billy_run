@@ -8,14 +8,11 @@
 
 
 # Billy's Constants
-.eqv GROUND_Y 58
+.eqv GROUND_Y 46        #GROUND_Y = where to draw Billy (rooted at top left corner, account for graphic height)
 .eqv JUMP_VELOCITY -5
 
 # Screen Constants
-.eqv SCREEN_HEIGHT 64 # Display Height / pixel unit lenth size (256/4) = 64
-.eqv SCREEN_WIDTH 128 # Display width divided by size of pixel unit width (512/4 = 128) 
-.eqv GROUND_Y1 59
-.eqv PIXEL_SIZE 4
-
-# Score Constants
+.eqv SCREEN_HEIGHT 64   # Display Height / pixel unit lenth size (256/4) = 64
+.eqv SCREEN_WIDTH 128   # Display width divided by size of pixel unit width (512/4 = 128) 
+.eqv GROUND_Y1 59       #GROUND_Y1 = where to draw the ground
 .eqv SCORE_MAX 99999

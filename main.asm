@@ -40,11 +40,11 @@ startNewGame:
 	#initialize obstacle timer
 	jal initObstacle
 	
-	# Draw Billy
-	jal drawBilly
-	
 	# Draw Ground
 	jal drawGround
+
+	# Draw Billy
+	jal drawBilly
 
 gameLoop:
 	
