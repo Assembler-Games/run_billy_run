@@ -125,36 +125,37 @@ bgLoop:
 				#s0 is now = yPos*512
 	add $s0, $s0, $a1	
 	move $a3, $s0		#save the value of starting pos in a3
-	
-	la $t8, nextIndex
-	li $t9, 1	#counter for which frame we're on
+
+##dont actually need this next commented out bit 
+#	la $t8, nextIndex
+#	li $t9, 1	#counter for which frame we're on
 #outer loop moves through the rows, inner loop moves through cols
-	li $t1, 0	#counter for outer loop
+#	li $t1, 0	#counter for outer loop
 drawLoop:
-	li $t2, 0	#counter for inner loop
-	innerDrawLoop:
-		lw $t5, 0($s1)
+#	li $t2, 0	#counter for inner loop
+#	innerDrawLoop:
+#		lw $t5, 0($s1)
 		
-		beq $t5, 0, transpPixel
-		beq $t5, 1, brown
-		beq $t5, 2, liBrown
-		beq $t5, 3, drBrown
-		beq $t5, 4, black
-		#blt $t2, 21, innerLoop
+#		beq $t5, 0, transpPixel
+#		beq $t5, 1, brown
+#		beq $t5, 2, liBrown
+#		beq $t5, 3, drBrown
+#		beq $t5, 4, black
+#		#blt $t2, 21, innerLoop
 	
-	nextIndex:
-		#increment
-		addi $t2, $t2, 1
-		addi $s0, $s0, 4
-		addi $s1, $s1, 4
-		blt $t2, 15, innerDrawLoop	#loop till reaching end of array row
+#	nextIndex:
+#		#increment
+#		addi $t2, $t2, 1
+#		addi $s0, $s0, 4
+#		addi $s1, $s1, 4
+#		blt $t2, 15, innerDrawLoop	#loop till reaching end of array row
 	
-		addi $s0, $s0, 452	#update offset
-		addi $t1, $t1, 1	
-		blt $t1, 13, drawLoop
-		#end of loop
-		addi $t9, $t9, 1	# add for the next frame
-		la $s0, display		#reset display 
+#		addi $s0, $s0, 452	#update offset
+#		addi $t1, $t1, 1	
+#		blt $t1, 13, drawLoop
+#		end of loop
+#		addi $t9, $t9, 1	# add for the next frame
+#		la $s0, display		#reset display 
 	
 #TODO: 
 # 1. set a sleep function so that program pauses on F1
@@ -165,8 +166,10 @@ drawLoop:
 #	li $v0, 32
 #	la $a0, 1000	#1000milis/4sec = 250 milis (b/c animation is 4 fps)
 #	syscall
+
+
 	move $s0, $a3		#reset for erasing
-	la $s1, billyF2 	#!!!! load frame 2
+	la $s1, billyF1 	#!!!! load frame 2
 	
 	li $t1, 0
 frameCHGLoop:
