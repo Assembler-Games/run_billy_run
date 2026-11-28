@@ -102,13 +102,18 @@ drawBilly:
 
 	#to get y starting position, we need to have S0 start at offset 512(length of screen)*Yposition
 	lw $t4, billyY
-	li $t5, 512
-	mul $t7, $t4, $t5	#t7 = yPos*512
-	add $s0, $s0, $t7	#make the starting address lower so billy is on the ground (not at 0,0)
-						#s0 is now = yPos*512
+	li $t5, SCREEN_WIDTH
 	
+	mul $t7, $t4, $t5	#t7 = yPos * 128
+
 	lw $t4, billyX
-	add $s0, $s0, $t4	
+	add $s1, $t4, $t7	#make the starting address lower so billy is on the ground (not at 0,0)
+						#s1 is now = yPos*128 + xPos
+	li $t4, 4
+	mul $t4, $s1, $t4   # 4 * $s1; 4 is the byte offset
+
+	add $s0, $s0, $t4	# s0 = base + 4(yPos*128 + xPos)
+
 	move $a3, $s0		#save the value of starting pos in a3
 
 	li $t4, SKY			#load light blue color
@@ -117,9 +122,17 @@ drawBilly:
 	lw $t9, currentFrame	
 
 	beq $t9, 1, frame1
-	beq $t9, 2, frame2	
-	beq $t9, 3, frame3
-	beq $t9, 4, frame4
+	beq $t9, 2, frame1
+	beq $t9, 3, frame1
+	beq $t9, 4, frame2	
+	beq $t9, 5, frame2	
+	beq $t9, 6, frame2	
+	beq $t9, 7, frame3
+	beq $t9, 8, frame3
+	beq $t9, 9, frame3
+	beq $t9, 10, frame4
+	beq $t9, 11, frame4
+	beq $t9, 12, frame4
 
 	frame1:
 		la $s1, billyF1
@@ -137,7 +150,9 @@ drawBilly:
 		la $s1, billyF4
 	
 		#reset counters outside of drawLoop
+		bne $t9, 12 drawFrameFour
 		li $t9, 0
+drawFrameFour:
 		li $t1, 0
 		b frameCHGLoop
 	
@@ -166,9 +181,9 @@ frameCHGLoop:
 		addi $s0, $s0, 452
 		blt $t1, 13, frameCHGLoop
 		
-	li $v0, 32
-	la $a0, 200	#1000milis/4sec = 250 milis (b/c animation is 4 fps)
-	syscall
+	#li $v0, 32
+	#li $a0, FRAME_DELAY	#1000milis/4sec = 250 milis (b/c animation is 4 fps)
+	#syscall
 	
 	move $s0, $a3		#reset for printing
 	
@@ -223,19 +238,21 @@ eraseBilly:
 	lw $s0, heapBase	#get starting position
 
 	lw $t4, billyY
-	li $t5, 512
-	mul $t7, $t4, $t5	#t7 = yPos*512
-	add $s0, $s0, $t7	#make the starting address lower so billy is on the ground (not at 0,0)
-						#s0 is now = yPos*512
+	li $t5, SCREEN_WIDTH
 	
+	mul $t7, $t4, $t5	#t7 = yPos * 128
+
 	lw $t4, billyX
-	add $s0, $s0, $t4	
-	#move $a3, $s0		#save the value of starting pos in a3
+	add $s1, $t4, $t7	#make the starting address lower so billy is on the ground (not at 0,0)
+						#s1 is now = yPos*128 + xPos
+	li $t4, 4
+	mul $t4, $s1, $t4   # 4 * $s1; 4 is the byte offset
+
+	add $s0, $s0, $t4	# s0 = base + 4(yPos*128 + xPos)
 
 	li $t4, SKY			#load light blue color
 
-	#move $s0, $a3		#reset for erasing
-li $t1, 0
+	li $t1, 0
 eraseFrame:
 	li $t2, 0
 	innerFrameCHG:
@@ -296,7 +313,7 @@ returnDrawGround:
 #===========================================
 initScreen:
 	addi $sp, $sp, -8
-	sw $ra, 8($sp)		#i think this saves and updates the return address (so it comes back to main)
+	sw $ra, 0($sp)		#i think this saves and updates the return address (so it comes back to main)
 	
 	# Reserved 512x256pixels in heap space
 	li $v0, 9
@@ -305,7 +322,7 @@ initScreen:
 
 	sw $v0, heapBase	#v0 = The starting address defined in heapBase
 
-	lw $ra, 8($sp)
+	lw $ra, 0($sp)
 	addi $sp, $sp, 8
 	
 	jr $ra
@@ -397,7 +414,36 @@ drawPixel:
 # Purpose: 
 # Inputs: 
 #===========================================
-#drawBillyFrames:
+
+calculateAddress:
+		addi $sp, $sp, -4
+		sw $ra, 0($sp)
+
+	    # set $t0 to point to screen width
+    	li $s0, SCREEN_WIDTH
+
+    	# Calculate y * width
+    	mul $s1, $a1, $s0
+
+    	# Add x to it
+    	add $s1, $s1, $a0
+
+    	# Convert pixel index to byte offset; 4 bytes per pixel
+   		li $s0, 4
+    	mul $s1, $s1, $s0
+
+    	# Get heap base address
+    	lw $s2, heapBase	#s2 = base address
+
+    	# Add the calculated offset to framebuffer base address
+    	add $s2, $s2, $s1
+
+		move $v0, $s2
+
+		lw $ra 0($sp)
+		addi $sp, $sp, 4
+
+		jr $ra
 
 
 	

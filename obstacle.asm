@@ -11,7 +11,7 @@
 
 .data
 obstacleX:      .word -1, -1, -1, -1, -1
-obstacleY:      .word 58          # y position of obstacles
+obstacleY:      .word 53          # y position of obstacles
 obstacleColor:  .word 0x00FF0000
 spawnTimer:     .word 0
 moveTimer:      .word 0
@@ -22,9 +22,9 @@ collision:      .word 0
 # Function: initObstacle()
 # Initialize random generator and slots.
 initObstacle:
-    	la $t4, obstacleX           # set $t4 to point to obstacles
-    	li $t5, 5                   # number of obstacles
-    	li $t6, -1                  # 
+    	la $t4, obstacleX               # set $t4 to point to obstacles
+    	li $t5, NUMBER_OF_OBSTACLES     # number of obstacles
+    	li $t6, -1                      # 
 
 initObstacleLoop:
         sw $t6, 0($t4)
@@ -80,46 +80,35 @@ obstacleMovementTimer:
 
         bnez $t7, obstacleUpdateDone     # if ($t7 =! 0) -> jump to obstacleUpdateDone
 
-        sw $zero, moveTimer         # reset timer
+        sw $zero, moveTimer             # reset timer
 
-        jal eraseObstacles          #
+        jal eraseObstacles              
 
-        la $t4, obstacleX           # point to obstacles
-        li $t5, 5                   # obstacle count
+        la $t4, obstacleX               # point to obstacles
+        li $t5, 5                       # obstacle count
 
 obstacleMoveLoop:
-        lw $t6, 0($t4)              # load obstacle x position
-        bltz $t6, obstacleMoveNext  # skip if empty slot
-    
-        addiu $t6, $t6, -1          # move obstacle left
-        sw $t6, 0($t4)              # save the new position
+        lw $t6, 0($t4)                  # load obstacle x position
+        bltz $t6, obstacleMoveNext      # skip if empty slot
+                            
+        addiu $t6, $t6, -3             # move obstacle left
+        sw $t6, 0($t4)                  # save the new position
 	
-	# check collision with Billy
-	lw $t7, billyX		# load billy's x coordinate
-	bne $t6, $t7, obstacleMoveNext
-	
-	lw $t7, billyY		# load billy's y coordinate
-	lw $t8, obstacleY	# load the obstacle's y coordinate
-	bne $t7, $t8, obstacleMoveNext
-	
-	# else if both coordinates match set collision to 1 (true) collision detected
-	li $t7, 1
-	sw $t7, collision
 	
 obstacleMoveNext:
-        addiu $t4, $t4, 4           # point to next obstacle
-        addiu $t5, $t5, -1          # decrement count
-        bgtz $t5, obstacleMoveLoop  # loop if more obstacles to continue updating 
-        jal drawObstacles           # draw all obstacles
+        addiu $t4, $t4, 4               # point to next obstacle
+        addiu $t5, $t5, -1              # decrement count
+        bgtz $t5, obstacleMoveLoop      # loop if more obstacles to continue updating 
+        jal drawObstacles               # draw all obstacles
 
 obstacleUpdateDone: 
-        lw $ra, 0($sp)              # pop the return address save in stack
+        lw $ra, 0($sp)                  # pop the return address save in stack
         addiu $sp, $sp, 4
         jr $ra
 
 # Fill first free slot; if full, skip this spawn attempt.
 spawnObstacle:
-        la $t4, obstacleX           # point to obstacles
+        la $t4, obstacleX               # point to obstacles
         li $t5, 5
 obstacleFindSlot:
         lw $t6, 0($t4)
@@ -173,6 +162,80 @@ obstacleDrawNext:
         bgtz $t5, obstacleDrawLoop
         lw $ra, 0($sp)
         addiu $sp, $sp, 4
+        jr $ra
+
+
+#===========================================
+# Function: checkCollision()
+# Purpose: Iterate through active obstacles and perform AABB collision detection.
+# Input:   None
+# Output:  $v0 = 1 if collision detected
+#          $v0 = 0 otherwise
+#===========================================
+
+checkCollision:
+
+        # Default return value: no collision
+        li $v0, 0
+
+        # Load Billy's minimum boundaries
+        lw $t0, billyX
+        lw $t1, billyY
+
+        # Calculate Billy's max boundaries
+        addiu $t2, $t0, BILLY_WIDTH
+        addiu $t3, $t1, BILLY_HEIGHT
+
+        # Initialize obstacle array pointer and counter
+        la $t4, obstacleX
+        li $t5, NUMBER_OF_OBSTACLES
+
+checkCollisionLoop:
+
+        # Return if all obstacles have been checked
+        blez $t5, returnCheckCollision
+
+        # Load obstacle's xmin boundary
+        lw $t6, 0($t4)
+
+        # if boundaries x_min is -1 skip
+        bltz $t6, noCollisionDetect
+
+        # Calculate obstacle's x_max boundary
+        addiu $t8, $t6, OBSTACLE_WIDTH
+
+        # check if obstacles [x_min,x_max] interlap cross billy's [x_min,x_max]
+        ble $t8, $t0, noCollisionDetect
+        bge $t6, $t2, noCollisionDetect
+
+        # Load the obstacle's y_min boundary
+        lw $t7, obstacleY
+
+        # Calculate obstacle's y_max boundary
+        addiu $t9, $t7, OBSTACLE_HEIGHT
+
+        # check if obstacles [y_min,y_max] interlap billy's [y_min,y_max]
+        ble $t9, $t1, noCollisionDetect
+        bge $t7, $t3, noCollisionDetect
+
+        # If they do interlap then a collision was detected
+        # Collision detected
+        li $v0, 1
+        j returnCheckCollision
+
+noCollisionDetect:
+
+        # Advance to the next obstacle
+        addiu $t4, $t4, 4
+        addiu $t5, $t5, -1
+
+        j checkCollisionLoop
+
+returnCheckCollision:
+
+        # Update global collision flag
+        sw $v0, collision
+
         jr $ra
 
 
