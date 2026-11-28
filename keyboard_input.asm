@@ -33,7 +33,7 @@ checkForKey_Space:
 	beq $t2, $t3, setBillyJumping # branch to keyboardDone if the input was not SPACE
 
 checkForKey_q:
-	# Check if the input is the q value (ASCII value 113 Decimal
+	# Check if the input is the q value (ASCII value 113 Decimal)
 	li $t3, 113
 	beq $t2, $t3, setToExitGame
 	
@@ -52,7 +52,7 @@ setBillyJumping:
 	li $t0, JUMP_VELOCITY
 	sw $t0, billyYVel # update Billy's Y velocity to -5 pixes/frame
 	
-	# Set isBillyJumping = 1
+	# Set isBillyJumping = 1 (yes)
 	li $t0, 1
 	sw $t0, isBillyJumping
 	

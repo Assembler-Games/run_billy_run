@@ -7,13 +7,11 @@
 #===========================================
 
 .data
-heapBase: .word 0x10040000 # base address of heap for the display
-groundY: .word 59 # ground y position (one below billy's feet)
+heapBase: .word 0x10040000 	# base address of heap for the display
+groundY: .word 59 			# ground y position (one below billy's feet)
+currentFrame: .word 1		#what is the graphic frame we're on
 
-# Colors in hex = 0x00RRGGBB
-green: 		.word 0x0000FF00
-black: 		.word 0x00000000
-white: 		.word 0x00FFFFFF
+dirt: 		.word 0x57463B
 screenGray: .word 0x00C0C0C0
 
 #colors
@@ -96,59 +94,171 @@ billyF4:
 .text
 #===========================================
 # Function drawBilly()
-# Purpose: draw player at billyX, billyY in green
+# Purpose: draw player at billyX, billyY
+# Input: y position, what frame you're on
 #===========================================
-drawBilly:
-    lw $a0, billyX
-    lw $a1, billyY
-    lw $a2, black
+drawBilly:	
+	lw $s0, heapBase	#get starting position
 
-    j drawPixel
-#TODO: 
-#1. load in the buffer before billy is printed
-#2. jump to teh animation method
-
-#	addi $sp, $sp, -4
-#   sw $ra, 0($sp)
-
-#	lw $s0, heapBase
 	#to get y starting position, we need to have S0 start at offset 512(length of screen)*Yposition
-#	lw $t4, billyY
-#	li $t5, 512
-#	mul $t7, $t4, $t5	#t7 = yPos*512
-#	add $s0, $s0, $t7	#make the starting address lower so billy is on the ground
+	lw $t4, billyY
+	li $t5, 512
+	mul $t7, $t4, $t5	#t7 = yPos*512
+	add $s0, $s0, $t7	#make the starting address lower so billy is on the ground (not at 0,0)
 						#s0 is now = yPos*512
 	
-#	lw $t4, billyX
-#	add $s0, $s0, $t4	
-#	move $a3, $s0		#save the value of starting pos in a3
+	lw $t4, billyX
+	add $s0, $s0, $t4	
+	move $a3, $s0		#save the value of starting pos in a3
 
+	li $t4, SKY			#load light blue color
+
+	#load what frame we're on (input) from currentFrame
+	lw $t9, currentFrame	
+
+	beq $t9, 1, frame1
+	beq $t9, 2, frame2	
+	beq $t9, 3, frame3
+	beq $t9, 4, frame4
+
+	frame1:
+		la $s1, billyF1
+		li $t1, 0
+		b frameCHGLoop	
+	frame2:
+		la $s1, billyF2
+		li $t1, 0
+		b frameCHGLoop
+	frame3:
+		la $s1, billyF3
+		li $t1, 0
+		b frameCHGLoop
+	frame4:
+		la $s1, billyF4
+	
+		#reset counters outside of drawLoop
+		li $t9, 0
+		li $t1, 0
+		b frameCHGLoop
+	
+	li $t1, 0	#i think we can delete this
+frameCHGLoop:
+	li $t2, 0	#reset counter for the current line
+	loopColor:
+		#now fill the line we just erased with the next frame
+		lw $t5, 0($s1)	#read the value at index in billy's frame
+
+		#depending on the ID found at the current index, a different color will be assigned 
+		beq $t5, 0, transpPixel	
+		beq $t5, 1, brown
+		beq $t5, 2, liBrown
+		beq $t5, 3, drBrown
+		beq $t5, 4, black
+		
+		colorNext:
+		#increment
+		addi $t2, $t2, 1
+		addi $s0, $s0, 4
+		addi $s1, $s1, 4	#increment the frame
+		blt $t2, 15, loopColor	#loop till reaching end of array row
+		
+		addi $t1, $t1, 1
+		addi $s0, $s0, 452
+		blt $t1, 13, frameCHGLoop
+		
+	li $v0, 32
+	la $a0, 200	#1000milis/4sec = 250 milis (b/c animation is 4 fps)
+	syscall
+	
+	move $s0, $a3		#reset for printing
+	
+returnDrawBilly:
+	#go back to main
+	addi $t9, $t9, 1	# add for the next frame
+	sw $t9, currentFrame
+
+	jr $ra	#jump back to register from whence you came
+
+
+#(these are kind of like if statements)
+brown:
+	la COLOR, OUTLINE
+	sw COLOR, 0($s0)	#outline
+
+	j colorNext
+	
+liBrown:
+	la COLOR, FUR
+	sw COLOR, 0($s0)
+	
+	j colorNext
+drBrown:
+	la COLOR, SHADOW
+	sw COLOR, 0($s0)
+	
+	j colorNext
+black:
+	la COLOR, HAIR
+	sw COLOR, 0($s0)
+	
+	j colorNext
+	
+transpPixel:
+	j colorNext
+
+#   jr $ra
 #	la $s1, billyF1
 
 #	j drawBillyFrames
 
 #	lw $ra, 0($sp)
 #   addi $sp, $sp, 4
-#   jr $ra				#jump back to register from whence you came
+#   jr $ra				
 
 #===========================================
 # Function eraseBilly()
 # Purpose: draw screenColor pixel at billyX, billyY
 #===========================================
 eraseBilly:
-    	lw $a0, billyX
-    	lw $a1, billyY
-		li $a2, SKY
-    	#lw $a2, screenGray
+	lw $s0, heapBase	#get starting position
 
-    	j drawPixel
+	lw $t4, billyY
+	li $t5, 512
+	mul $t7, $t4, $t5	#t7 = yPos*512
+	add $s0, $s0, $t7	#make the starting address lower so billy is on the ground (not at 0,0)
+						#s0 is now = yPos*512
+	
+	lw $t4, billyX
+	add $s0, $s0, $t4	
+	#move $a3, $s0		#save the value of starting pos in a3
+
+	li $t4, SKY			#load light blue color
+
+	#move $s0, $a3		#reset for erasing
+li $t1, 0
+eraseFrame:
+	li $t2, 0
+	innerFrameCHG:
+		#erase billy by filling the memory with sky color
+		sw $t4, 0($s0)	#SKY
+		
+		addi $t2, $t2, 1
+		addi $s0, $s0, 4		
+		blt $t2, 15, innerFrameCHG	#go through row
+			
+		addi $t1, $t1, 1
+		addi $s0, $s0, 452
+		blt $t1, 13, eraseFrame
+
+		addi $s0, $s0, -60	#back to beginning of row
+
+	jr $ra
 
 #===========================================
 # Function: drawGround
 # Purpose: draw a line depicting the ground
 #===========================================
 drawGround:
-	
 	# allocate space in stack pointer to store return address
 	# this will allow us to return to the location where this function was called
 	addi $sp, $sp, -8
@@ -165,7 +275,7 @@ loopDraw:
 	
 	move $a0, $t5 	# copy x_i to arg register 1
 	move $a1, $t7 	# load y_ground to arg register 2
-	lw $a2, white 	# load color value to arg register 3
+	lw $a2, dirt 	# load color value to arg register 3
 	
 	jal drawPixel 	#drawPixel(x_i, y_ground, while)
 	
@@ -210,7 +320,7 @@ fillScreen:
 	sw $ra, 0($sp)
 	
 	li $t0, 0				# initial y value
-	li $t1, SCREEN_HEIGHT 	# max y value (64)
+	li $t1, GROUND_Y1 		# where the ground tarts (fill in sky till the ground line)
 	
 screenDrawLoop:
 	
@@ -287,110 +397,7 @@ drawPixel:
 # Purpose: 
 # Inputs: 
 #===========================================
-drawBillyFrames:
-#TODO: 
-# 1. set a sleep function so that program pauses on F1
-# 2. erase billy by filling the memory with sky color
-# 3. reset address to starting postion (remember to account for x and y)
-# 4. change the s1 to read from frame 2 (la $s1, billyF2)
-	#set a sleep function so frame holds
-#	li $v0, 32
-#	la $a0, 1000	#1000milis/4sec = 250 milis (b/c animation is 4 fps)
-#	syscall
-	move $s0, $a3		#reset for erasing
-	la $s1, billyF2 	#!!!! load frame 2
-	
-	li $t1, 0
-frameCHGLoop:
-	li $t2, 0
-	innerFrameCHG:
-		sw $t4, 0($s0)	#SKY
-		
-		addi $t2, $t2, 1
-		addi $s0, $s0, 4		
-		blt $t2, 15, innerFrameCHG	#go through row
-			
-	addi $s0, $s0, -60	#back to beginning of row
-	li $t2, 0
-	la $t8, colorNext
-	loopColor:
-		lw $t5, 0($s1)		
-		beq $t5, 0, transpPixel	#this isnt being skipped properly
-		beq $t5, 1, brown
-		beq $t5, 2, liBrown
-		beq $t5, 3, drBrown
-		beq $t5, 4, black
-		
-		colorNext:
-		#increment
-		addi $t2, $t2, 1
-		addi $s0, $s0, 4
-		addi $s1, $s1, 4	#increment the frame
-		blt $t2, 15, loopColor	#loop till reaching end of array row
-		
-		addi $t1, $t1, 1
-		addi $s0, $s0, 452
-		blt $t1, 13, frameCHGLoop
-		
-		addi $t9, $t9, 1	# add for the next frame
-	li $v0, 32
-	la $a0, 250	#1000milis/4sec = 250 milis (b/c animation is 4 fps)
-	syscall
-	
-	move $s0, $a3		#reset for printing
-	beq $t9, 1, frame1
-	beq $t9, 2, frame2	
-	beq $t9, 3, frame3
-	beq $t9, 4, frame4
-	
-frame1:
-	la $s1, billyF1
-	li $t1, 0
-	b frameCHGLoop	
-frame2:
-	la $s1, billyF2
-	li $t1, 0
-	b frameCHGLoop
-frame3:
-	la $s1, billyF3
-	li $t1, 0
-	b frameCHGLoop
-frame4:
-	la $s1, billyF4
-	
-	#reset counters outside of drawLoop
-	li $t9, 0
-	li $t1, 0
-	b frameCHGLoop
+#drawBillyFrames:
 
-
-#depending on the ID found at the current index, 
-#a different color will be assigned (these are kind of like if statements)
-brown:
-	#after loop is done, it drops off into the colors and keeps printing brown. 
-				#exit oncec all rows are traversed
-	la COLOR, OUTLINE
-	sw COLOR, 0($s0)	#outline
-
-	jr $t8
-	
-liBrown:
-	la COLOR, FUR
-	sw COLOR, 0($s0)
-	
-	jr $t8
-drBrown:
-	la COLOR, SHADOW
-	sw COLOR, 0($s0)
-	
-	jr $t8
-#black:
-#	la COLOR, HAIR
-#	sw COLOR, 0($s0)
-	
-#	jr $t8
-	
-transpPixel:
-	jr $t8
 
 	

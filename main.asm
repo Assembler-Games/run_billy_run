@@ -47,8 +47,6 @@ startNewGame:
 	jal drawBilly
 
 gameLoop:
-	
-	
 	# Erase billy from the bitmap display by drawing black pixel at his position	
 	jal eraseBilly
 	
@@ -78,8 +76,8 @@ gameLoop:
     	
     	# delay between frames
     	li $v0, 32
-	li $a0, 50
-	syscall
+		li $a0, 50
+		syscall
 
 	j gameLoop
 

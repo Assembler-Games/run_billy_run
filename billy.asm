@@ -24,7 +24,7 @@ isBillyJumping: .word 0 # values will be 0-1 (0 == not jumping, 1 == jumping)
 #===========================================
 initBilly:
 	# Store initial state in billy's position and gravity variables
-	li $t0, 16
+	li $t0, 20
 	sw $t0, billyX
 	
 	li $t1, GROUND_Y	#in constants.asm (GROUND_Y = 58)
@@ -46,23 +46,31 @@ initBilly:
 # Input: none
 #===========================================
 updateBillyPhysics:
+	#frame 1
+	#y = 16
+	#y new = y old + billyVelocity + gravity
+	#y new = 16 + (-5) + 1 = 12
+	#update billys velocity = -4
+	#frame 2 
+	#y old = 14
+	#y new = 14 - 4 +1 = 11
+	#update billys velocity = -3
+	#... next goes to 0, then into positive values until he hits the ground
 
 	#check if billy is jumping otherwise return
 	lw $t0, isBillyJumping
 	beq $t0, $zero, billyUpdatePhysComp
 	
 	# calculate new y value; y = y_old + billyVel + gravity
-	
 	# add billyVel + gravity
 	lw $t1, billyYVel
 	lw $t2, gravity
 	
-	add $t1, $t1, $t2
+	add $t1, $t1, $t2	#rate
 	
 	# add billy's current y value with $t1, where $t1 = billyVel + gravity
 	lw $t3, billyY
-	
-	add $t3, $t3, $t1
+	add $t3, $t3, $t1	#position
 	
 	# check if billy's collided with the ground or is still airborne
 	li $t4, GROUND_Y
@@ -76,6 +84,9 @@ saveBillyUpPhysics:
 	#store the billyVel
 	sw $t1, billyYVel
 	sw $t3, billyY
+
+	li $t9, 4
+	sw $t9, currentFrame
 	
 billyUpdatePhysComp:
 	# return to caller
