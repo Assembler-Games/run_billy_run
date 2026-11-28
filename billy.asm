@@ -24,13 +24,13 @@ isBillyJumping: .word 0 # values will be 0-1 (0 == not jumping, 1 == jumping)
 #===========================================
 initBilly:
 	# Store initial state in billy's position and gravity variables
-	li $t0, 20
+	li $t0, 10
 	sw $t0, billyX
 	
 	li $t1, GROUND_Y	#in constants.asm (GROUND_Y = 58)
 	sw $t1, billyY
 	
-	li $t2, 1
+	li $t2, BILLY_GRAVITY
 	sw $t2, gravity
 	
 	# Set billy's velocity and isJumping to zero

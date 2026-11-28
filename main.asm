@@ -26,13 +26,6 @@ startNewGame:
 	lw $a2, screenGray
 	jal fillScreen
 	
-	#Reset the continue variable
-    	li $t0, 1
-    	sw $t0, continue
-    	
-    	#Reset the collision variable
-    	li $t0, 0
-    	sw $t0, collision
 
 	#initialize billy
 	jal initBilly
@@ -47,6 +40,7 @@ startNewGame:
 	jal drawBilly
 
 gameLoop:
+	
 	# Erase billy from the bitmap display by drawing black pixel at his position	
 	jal eraseBilly
 	
@@ -59,28 +53,23 @@ gameLoop:
 	# update obstacle -> move original obstacle leftwards
 	jal updateObstacle
 	
-	#check collision first
-	lw $t2, collision
-	bnez $t2, gameOver
-
 	# draw billy
 	jal drawBilly
-	
+
+
 	jal addScore
+    	
+    	#check collision first
+	jal checkCollision
+	move $t2, $v0
+	bnez $t2, gameOver
 	
-	#Check if the player wants to quit
-    	lw $t1, continue
-    	
-    	#when collision happened, game over
-	beq $t1, $zero, gameOver
-    	
     	# delay between frames
     	li $v0, 32
-		li $a0, 50
-		syscall
+	li $a0, FRAME_DELAY
+	syscall
 
 	j gameLoop
-
 
 gameOver:
 	#Print the final score after collision
@@ -92,7 +81,7 @@ gameOver:
 	#restart the game when $v0==1
 	li $t0, 1
 	
-    	beq $v0, $t0, startNewGame
+    beq $v0, $t0, startNewGame
 	#quit the game
 	j quitGame
 
